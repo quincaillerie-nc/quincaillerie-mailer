@@ -43,11 +43,9 @@ Cas d'usage typiques :
 ## ✅ Prérequis
 
 - Python **3.10+**
-- Un compte Gmail avec un **mot de passe d'application** activé
 - `pip` installé
 
-> 💡 Pour créer un mot de passe d'application Gmail :  
-> Compte Google → Sécurité → Validation en 2 étapes → Mots de passe des applications
+
 
 ---
 
