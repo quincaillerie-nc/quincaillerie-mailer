@@ -38,3 +38,6 @@ def envoyer_debug(sujet, message):
         sujet=f"[DEBUG] {sujet}",
         corps=message
     )
+
+
+# test
