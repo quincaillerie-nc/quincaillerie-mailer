@@ -1,52 +1,241 @@
-# Module Mailer
+# 📬 Quincaillerie Mailer
 
-Module d'envoi d'emails via SMTP SSL pour le projet Quincaillerie.
+> Module Python d'envoi d'emails officiel pour **Quincaillerie NC**.  
+> Léger, simple à intégrer, sécurisé — conçu pour s'intégrer dans tous les services de l'écosystème Quincaillerie NC.
 
-## Description
+---
 
-Ce module gere l'envoi d'emails depuis le serveur ou en local.
-Il utilise un serveur SMTP Hostinger avec chiffrement SSL sur le port 465.
-La configuration est chargee depuis un fichier .env a la racine du projet.
+## 📋 Table des matières
 
-## Fonctions disponibles
+- [Présentation](#-présentation)
+- [Prérequis](#-prérequis)
+- [Installation](#-installation)
+- [Configuration](#-configuration)
+- [Utilisation](#-utilisation)
+- [Exemples avancés](#-exemples-avancés)
+- [Structure du projet](#-structure-du-projet)
+- [Tests](#-tests)
+- [Dépendances](#-dépendances)
+- [Sécurité](#-sécurité)
+- [Contribuer](#-contribuer)
+- [Auteur](#-auteur)
 
-### envoyer_email(destinataire, sujet, corps, html=False)
-Envoie un email a un destinataire.
-- destinataire : adresse email cible (str)
-- sujet        : objet du mail (str)
-- corps        : contenu du mail (str)
-- html         : True si le corps est en HTML, False pour texte brut
-- retourne     : True si succes, False si erreur
+---
 
-### envoyer_debug(sujet, message)
-Envoie un email de supervision au support.
-Prefixe automatiquement le sujet avec [DEBUG].
-- sujet   : objet du mail (str)
-- message : contenu (str)
-- retourne : True si succes, False si erreur
+## 📖 Présentation
 
-## Configuration .env requise
+`quincaillerie-mailer` est un module Python autonome permettant l'envoi d'emails transactionnels pour les services de Quincaillerie NC.
 
-SMTP_HOST=smtp.hostinger.com
-SMTP_PORT=465
-SMTP_USER=support@robot-nc.com
-SMTP_PASSWORD=ton_mot_de_passe
-SMTP_FROM_EMAIL=support@robot-nc.com
-SMTP_FROM_NAME=Analyses Commercial
+Il est conçu pour être :
+- **Importé** dans n'importe quel autre module Python du projet
+- **Simple** à configurer via un fichier `.env`
+- **Testé** avec une suite de tests unitaires intégrée
+- **Sécurisé** — aucun credential dans le code source
 
-## Exemple d'utilisation
+Cas d'usage typiques :
+- Confirmation de commande client
+- Notification interne au personnel
+- Alertes automatiques du serveur
+- Envoi de factures ou documents
 
-from modules.mailer import envoyer_email, envoyer_debug
+---
 
-envoyer_email("client@example.com", "Facture", "Votre facture est disponible")
-envoyer_debug("Erreur critique", "Le script X a plante a 03h00")
+## ✅ Prérequis
 
-## Dependances
+- Python **3.10+**
+- Un compte Gmail avec un **mot de passe d'application** activé
+- `pip` installé
 
-- python-dotenv
-- smtplib (standard Python)
-- email (standard Python)
+> 💡 Pour créer un mot de passe d'application Gmail :  
+> Compte Google → Sécurité → Validation en 2 étapes → Mots de passe des applications
 
-## Auteur
+---
 
-Projet Quincaillerie NC
+## 📦 Installation
+
+### Cloner le dépôt
+
+```bash
+git clone git@github.com:quincaillerie-nc/quincaillerie-mailer.git
+cd quincaillerie-mailer
+```
+
+### Installer les dépendances
+
+```bash
+pip install -r requirements.txt
+```
+
+---
+
+## ⚙️ Configuration
+
+Crée un fichier `.env` à la racine du projet :
+
+```env
+MAIL_SENDER=quincaillerie.nc@gmail.com
+MAIL_PASSWORD=xxxx xxxx xxxx xxxx
+```
+
+| Variable | Description |
+|---|---|
+| `MAIL_SENDER` | Adresse email expéditeur Gmail |
+| `MAIL_PASSWORD` | Mot de passe d'application Gmail (16 caractères) |
+
+> ⚠️ **Ne jamais committer le fichier `.env`** — il est protégé par le `.gitignore`
+
+---
+
+## 🚀 Utilisation
+
+### Import basique
+
+```python
+from mailer import send_email
+
+send_email(
+    to="client@example.com",
+    subject="Votre commande est prête",
+    body="Bonjour, votre commande est disponible en magasin."
+)
+```
+
+### Paramètres de `send_email()`
+
+| Paramètre | Type | Obligatoire | Description |
+|---|---|---|---|
+| `to` | `str` | ✅ | Adresse email du destinataire |
+| `subject` | `str` | ✅ | Sujet de l'email |
+| `body` | `str` | ✅ | Corps du message (texte brut) |
+
+---
+
+## 💡 Exemples avancés
+
+### Confirmation de commande
+
+```python
+from mailer import send_email
+
+def confirmer_commande(client_email, numero_commande):
+    send_email(
+        to=client_email,
+        subject=f"Confirmation commande #{numero_commande}",
+        body=(
+            f"Bonjour,\n\n"
+            f"Votre commande #{numero_commande} a bien été enregistrée.\n"
+            f"Vous serez contacté dès qu'elle sera disponible.\n\n"
+            f"Merci de votre confiance,\n"
+            f"L'équipe Quincaillerie NC"
+        )
+    )
+```
+
+### Alerte interne
+
+```python
+from mailer import send_email
+
+def alerter_stock(produit, quantite):
+    send_email(
+        to="responsable@quincaillerie.nc",
+        subject=f"⚠️ Stock bas : {produit}",
+        body=f"Le produit '{produit}' a atteint un stock critique : {quantite} unités restantes."
+    )
+```
+
+### Intégration dans le serveur principal
+
+```python
+# Dans serveur-quincaillerie
+import sys
+sys.path.append('../quincaillerie-mailer')
+from mailer import send_email
+
+send_email(
+    to="admin@quincaillerie.nc",
+    subject="Serveur démarré",
+    body="Le serveur Quincaillerie NC est opérationnel."
+)
+```
+
+---
+
+## 📁 Structure du projet
+
+```
+quincaillerie-mailer/
+│
+├── mailer.py            # Fonction principale send_email()
+├── __init__.py          # Export du module
+│
+├── tests/
+│   └── test_mailer.py   # Tests unitaires
+│
+├── .env                 # Variables d'environnement (NON commité)
+├── .gitignore           # Fichiers ignorés par Git
+├── requirements.txt     # Dépendances Python
+└── README.md            # Documentation
+```
+
+---
+
+## 🧪 Tests
+
+Lancer tous les tests :
+
+```bash
+python -m pytest tests/ -v
+```
+
+Résultat attendu :
+
+```
+tests/test_mailer.py::test_send_email_success    PASSED
+tests/test_mailer.py::test_missing_env_vars      PASSED
+tests/test_mailer.py::test_invalid_recipient     PASSED
+```
+
+---
+
+## 📚 Dépendances
+
+| Package | Version | Rôle |
+|---|---|---|
+| `python-dotenv` | 1.0.0 | Chargement des variables `.env` |
+
+Installation manuelle :
+
+```bash
+pip install python-dotenv
+```
+
+---
+
+## 🔒 Sécurité
+
+- Les credentials sont stockés dans `.env`, jamais dans le code
+- Le `.gitignore` protège les fichiers sensibles
+- Utilisation d'un **mot de passe d'application Gmail** dédié
+- Aucune donnée client n'est stockée par le module
+
+---
+
+## 🤝 Contribuer
+
+1. Fork le dépôt
+2. Crée une branche : `git checkout -b feature/ma-feature`
+3. Commit : `git commit -m "feat: ma nouvelle feature"`
+4. Push : `git push origin feature/ma-feature`
+5. Ouvre une **Pull Request**
+
+---
+
+## 👤 Auteur
+
+**Quincaillerie NC**  
+🔗 [github.com/quincaillerie-nc](https://github.com/quincaillerie-nc)
+
+---
+
+*Documentation générée pour quincaillerie-mailer — Quincaillerie NC © 2025*
